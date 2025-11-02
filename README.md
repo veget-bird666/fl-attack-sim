@@ -15,6 +15,9 @@ python client.py --client-id 2  等等，注意这里输入的id是用户名，�
 3.这里为了方便，写了launch_clients.py，可直接加载10个终端自动按上述2的方式运行id从1到10的命令。
 ## 配置要求：
 由于本项目的部分库对版本有范围要求，所以不能全部使用最新版，建议重新创建新的虚拟环境来运行本项目，下面是能正常运行的参考版本的命令（采用清华镜像）。
+
 pip install tensorflow==2.15.1 keras==2.15.0 flwr==1.22.0 protobuf==4.25.8 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
 pip install scikit-learn -i https://pypi.tuna.tsinghua.edu.cn/simple
+
 pip install pandas -i https://pypi.tuna.tsinghua.edu.cn/simple

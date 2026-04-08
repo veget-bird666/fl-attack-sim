@@ -20,17 +20,38 @@ class MaliciousFedAvg(fl.server.strategy.FedAvg):
 
     def configure_fit(self, server_round: int, parameters: Parameters, 
                      client_manager: fl.server.client_manager.ClientManager
-                     ) -> List[Tuple[ClientProxy, fl.common.FitIns]]:
+    ) -> List[Tuple[ClientProxy, fl.common.FitIns]]:
         # 保存发送给客户端的全局权重（训练前）
         print(f"[Malicious] Round {server_round}: Saving global weights")
         global_weights = parameters_to_ndarrays(parameters)
         np.savez(f"{LEAKED_DATA_DIR}/global_round_{server_round}.npz", *global_weights)
-        return super().configure_fit(server_round, parameters, client_manager)
+        # 传递 server_round 给客户端
+        config = {"server_round": str(server_round)}
+        fit_ins = super().configure_fit(server_round, parameters, client_manager)
+        # 更新配置
+        updated_fit_ins = []
+        for client_proxy, fit_in in fit_ins:
+            fit_in.config.update(config)
+            updated_fit_ins.append((client_proxy, fit_in))
+        return updated_fit_ins
+
+    def configure_evaluate(self, server_round: int, parameters: Parameters,
+                          client_manager: fl.server.client_manager.ClientManager
+    ) -> List[Tuple[ClientProxy, fl.common.EvaluateIns]]:
+        # 传递 server_round 给客户端
+        config = {"server_round": str(server_round)}
+        eval_ins = super().configure_evaluate(server_round, parameters, client_manager)
+        # 更新配置
+        updated_eval_ins = []
+        for client_proxy, eval_in in eval_ins:
+            eval_in.config.update(config)
+            updated_eval_ins.append((client_proxy, eval_in))
+        return updated_eval_ins
 
     def aggregate_fit(self, server_round: int,
-                     results: List[Tuple[ClientProxy, fl.common.FitRes]],
+            results: List[Tuple[ClientProxy, fl.common.FitRes]],
                      failures: List[Union[Tuple[ClientProxy, fl.common.FitRes], BaseException]]
-                     ) -> Tuple[Optional[Parameters], Dict[str, fl.common.Scalar]]:
+    ) -> Tuple[Optional[Parameters], Dict[str, fl.common.Scalar]]:
         # 窃取客户端权重
         if results:
             target_client, fit_res = results[0]

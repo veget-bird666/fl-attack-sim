@@ -17,7 +17,7 @@ def load_data() -> Tuple[pd.DataFrame, LabelEncoder, LabelEncoder, int]:
         return _data, _user_encoder, _movie_encoder, _num_movies
 
     ratings = pd.read_csv("ml-latest-small/ratings.csv")
-    
+
     user_ids = list(range(1, NUM_USERS + 1))
     _user_encoder = LabelEncoder()
     _user_encoder.fit(user_ids)
